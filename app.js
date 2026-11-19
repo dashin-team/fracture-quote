@@ -532,12 +532,13 @@
           c.effectiveAdh > 0 ? "理賠 " + money.format(c.adhFracture + c.adhCare) + " 元" : "未投保 ADH");
       }
     }
-    // 骨折與脫臼可同時選取：骨折標籤一律標示目前骨折部位；有選脫臼部位時，該關節標籤也標示
+    // 一次只亮最新的一個部位：脫臼模式只亮該關節，否則只亮目前骨折
     var pills = document.querySelectorAll(".chart-pill");
     for (var k = 0; k < pills.length; k++) {
       var kd = pills[k].getAttribute("data-kind"), pid = pills[k].getAttribute("data-id");
-      pills[k].classList.toggle("is-active", kd === "bone" ? !!c.bone && pid === c.bone.id : pid === (state.jointId || ""));
-      pills[k].classList.toggle("is-joint-mode", !!joint && kd === "joint");
+      var on = joint ? kd === "joint" && pid === joint.id : kd === "bone" && !!c.bone && pid === c.bone.id;
+      pills[k].classList.toggle("is-active", on);
+      pills[k].classList.toggle("is-joint-mode", on && kd === "joint");
     }
     var boxes = document.querySelectorAll(".chart-overlay");
     for (var i = 0; i < boxes.length; i++) {
@@ -599,8 +600,7 @@
       pay += row("ADM 住院 " + c.allowedHospitalDays + " 日", yuan(c.admHospital));
       pay += row("ADM 未住院骨折給付", yuan(c.admBoneSupport));
     }
-    if (c.joint) pay += row("脫臼開放性復位術｜" + esc(c.joint.label), adh ? yuan(c.dislocation) : "未投保 ADH", adh ? "" : "is-muted");
-    if (adm || adh) pay += row(c.joint ? "定額給付合計（骨折＋脫臼）" : "定額給付合計", yuan(c.joint ? c.fixedTotalWithJoint : c.fixedFractureTotal), "is-total");
+    if (adm || adh) pay += row("定額給付合計", yuan(c.fixedFractureTotal), "is-total");
     callout.innerHTML =
       '<span class="callout-label">目前骨折部位</span>' +
       '<div class="callout-main"><strong>' + esc(bone.label) + "</strong><b>" + bone.adh + "%</b></div>" +
@@ -650,17 +650,29 @@
     return { kind: best.kind, id: best.id };
   }
 
+  function focusBone(id) {
+    state.boneId = id || "";
+    state.jointId = ""; // 改選骨折時清掉脫臼，圖上與說明卡只留這一處
+    chartView.mode = "bone";
+    chartView.jointId = null;
+  }
+
+  function focusJoint(id) {
+    state.jointId = id || "";
+    state.boneId = ""; // 改選脫臼時清掉骨折
+    chartView.mode = "joint";
+    chartView.jointId = id || null;
+  }
+
   function selectBone(id) {
     if (!id || !R.BONE_CHART[id]) return;
-    state.boneId = id; // 與左側「骨折部位」下拉選單相同效果
-    chartView.mode = "bone";
+    focusBone(id); // 與左側「骨折部位」下拉選單相同效果
     render();
   }
 
   function selectJoint(id) {
     if (!findJoint(id)) return;
-    state.jointId = id; // 與左側「脫臼部位」選單相同效果（計入報價卡）
-    chartView.mode = "joint"; chartView.jointId = id;
+    focusJoint(id); // 與左側「脫臼部位」選單相同效果（計入報價卡）
     render();
   }
 
@@ -796,11 +808,11 @@
     on("tmrAmount", "input", function (t) { state.tmrAmount = clampNum(t.value, 0, RULES.tmr.max); });
     on("admDaily", "input", function (t) { state.admDaily = clampNum(t.value, 0, RULES.adm.max); });
     on("adhAmount", "input", function (t) { state.adhAmount = clampNum(t.value, 0, compute(state).maxAdh); });
-    on("boneId", "change", function (t) { state.boneId = t.value; chartView.mode = !t.value && state.jointId ? "joint" : "bone"; });
-    on("fractureType", "change", function (t) { state.fractureType = t.value; chartView.mode = "bone"; });
+    on("boneId", "change", function (t) { focusBone(t.value && R.BONE_CHART[t.value] ? t.value : ""); });
+    on("fractureType", "change", function (t) { state.fractureType = t.value; if (state.boneId) focusBone(state.boneId); });
     on("jointId", "change", function (t) {
-      state.jointId = t.value;
-      chartView.mode = t.value ? "joint" : "bone"; chartView.jointId = t.value || null;
+      if (t.value && findJoint(t.value)) focusJoint(t.value);
+      else focusBone(state.boneId);
     });
     on("hospitalDays", "input", function (t) { state.hospitalDaysInput = t.value; });
     on("hospitalDays", "blur", function () { state.hospitalDaysInput = String(compute(state).hospitalDays); });
