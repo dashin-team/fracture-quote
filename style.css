@@ -708,14 +708,30 @@ select:focus {
 .premium-daily {
   grid-column: 1 / -1;
   justify-self: end;
-  color: var(--red);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.28em;
+  margin-top: 4px;
+  padding: 2px 9px 3px;
+  border: 1px solid #f0c9c4;
+  border-radius: 8px;
+  background: #fff3f0;
+  color: #9a3834;
   white-space: nowrap;
-  margin-top: 1px;
-  font-size: 13px;
+  font-size: 14px;
   font-style: normal;
   font-weight: 800;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
   line-height: 1.2;
+}
+.premium-daily b {
+  color: var(--red);
+  font-family: var(--display-number);
+  font-variant-numeric: tabular-nums;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1;
 }
 .alert-strip {
   color: #852c20;
@@ -1023,7 +1039,13 @@ select:focus {
     font-size: 27px;
   }
   .premium-daily {
+    gap: 0.22em;
+    margin-top: 3px;
+    padding: 2px 7px 3px;
     font-size: 12px;
+  }
+  .premium-daily b {
+    font-size: 18px;
   }
   .coverage-wheel {
     grid-template-columns: 1fr;

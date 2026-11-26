@@ -339,8 +339,8 @@
     var olaPeriodic = p ? p.periodic.ola : undefined;
     var totalText = (!p || p.total === null) ? "待確認" : "$" + money.format(p.total);
     var payTimes = { annual: 1, semi: 2, quarter: 4, month: 12 }[s.payMode];
-    var dailyText = (p && p.total && payTimes)
-      ? "平均每日 " + money.format(Math.round(p.total * payTimes / 365)) + " 元" : "";
+    var dailyAmount = (p && p.total && payTimes)
+      ? money.format(Math.round(p.total * payTimes / 365)) : "";
     var alert = c.existingMainWarning ? "請先確認原主約效期與附約搭配額度。" : (c.olaError || c.ageError);
     var per = function (k) { return "$" + money.format(p ? p.periodic[k] : 0); };
 
@@ -351,7 +351,7 @@
       "<p>" + (c.age >= 0 ? "保險年齡 " + c.age + " 歲" : "年齡待確認") + "｜" + (s.gender === "female" ? "女性" : "男性") +
       "｜職業第 " + s.occupation + " 類｜" + esc(c.pay.label) + "</p></div>" +
       '<div class="premium-total"><small>' + esc(c.pay.suffix) + "合計保費</small><strong>" + totalText + "</strong><span>元</span>" +
-      (dailyText ? '<em class="premium-daily">' + esc(dailyText) + "</em>" : "") + "</div></div>";
+      (dailyAmount ? '<em class="premium-daily">平均每日 <b>' + esc(dailyAmount) + "</b> 元</em>" : "") + "</div></div>";
 
     if (alert) html += '<div class="alert-strip">' + esc(alert) + "</div>";
 
