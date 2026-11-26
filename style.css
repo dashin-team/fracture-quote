@@ -705,6 +705,18 @@ select:focus {
   font-size: 15px;
   font-weight: 900;
 }
+.premium-daily {
+  grid-column: 1 / -1;
+  justify-self: end;
+  color: var(--red);
+  white-space: nowrap;
+  margin-top: 1px;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+}
 .alert-strip {
   color: #852c20;
   background: #fff0dc;
@@ -1009,6 +1021,9 @@ select:focus {
   }
   .premium-total strong {
     font-size: 27px;
+  }
+  .premium-daily {
+    font-size: 12px;
   }
   .coverage-wheel {
     grid-template-columns: 1fr;
